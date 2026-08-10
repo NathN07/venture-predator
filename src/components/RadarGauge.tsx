@@ -19,11 +19,11 @@ function polar(angleDeg: number, r: number) {
   return { x: CENTER + r * Math.cos(rad), y: CENTER + r * Math.sin(rad) };
 }
 
-export default function RadarGauge({ metrics }: { metrics: Metrics }) {
+export default function RadarGauge({ metrics, thinking = false }: { metrics: Metrics; thinking?: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative" style={{ width: SIZE, height: SIZE }}>
-        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
+    <div className="flex flex-col items-center gap-4 w-full max-w-[280px] mx-auto">
+      <div className="relative w-full aspect-square">
+        <svg width="100%" height="100%" viewBox={`0 0 ${SIZE} ${SIZE}`}>
           {/* rings */}
           {[0.35, 0.65, 1].map((f) => (
             <circle
@@ -40,16 +40,16 @@ export default function RadarGauge({ metrics }: { metrics: Metrics }) {
           <line x1={CENTER - MAX_R} y1={CENTER} x2={CENTER + MAX_R} y2={CENTER} stroke="var(--color-line)" strokeWidth={1} />
           <line x1={CENTER} y1={CENTER - MAX_R} x2={CENTER} y2={CENTER + MAX_R} stroke="var(--color-line)" strokeWidth={1} />
 
-          {/* continuous sweep */}
+          {/* continuous sweep — speeds up while Vesper is "thinking" */}
           <motion.g
             style={{ transformOrigin: `${CENTER}px ${CENTER}px` }}
             animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, ease: "linear", duration: 4 }}
+            transition={{ repeat: Infinity, ease: "linear", duration: thinking ? 1 : 4 }}
           >
             <path
               d={`M ${CENTER} ${CENTER} L ${CENTER + MAX_R} ${CENTER} A ${MAX_R} ${MAX_R} 0 0 1 ${polar(30, MAX_R).x} ${polar(30, MAX_R).y} Z`}
-              fill="var(--color-venom)"
-              opacity={0.06}
+              fill={thinking ? "var(--color-blood)" : "var(--color-venom)"}
+              opacity={thinking ? 0.12 : 0.06}
             />
           </motion.g>
 
@@ -63,6 +63,7 @@ export default function RadarGauge({ metrics }: { metrics: Metrics }) {
                 <motion.line
                   x1={CENTER}
                   y1={CENTER}
+                  initial={{ x2: CENTER, y2: CENTER }}
                   animate={{ x2: tip.x, y2: tip.y }}
                   transition={{ type: "spring", stiffness: 90, damping: 14 }}
                   stroke={arm.color}
@@ -70,6 +71,7 @@ export default function RadarGauge({ metrics }: { metrics: Metrics }) {
                   strokeLinecap="round"
                 />
                 <motion.circle
+                  initial={{ cx: CENTER, cy: CENTER }}
                   animate={{ cx: tip.x, cy: tip.y }}
                   transition={{ type: "spring", stiffness: 90, damping: 14 }}
                   r={5}
@@ -91,8 +93,15 @@ export default function RadarGauge({ metrics }: { metrics: Metrics }) {
             );
           })}
 
-          {/* center blip: the prey */}
-          <circle cx={CENTER} cy={CENTER} r={4} fill="var(--color-paper)" />
+          {/* center blip: the prey — pulses while Vesper is deciding */}
+          <motion.circle
+            cx={CENTER}
+            cy={CENTER}
+            r={4}
+            fill={thinking ? "var(--color-blood)" : "var(--color-paper)"}
+            animate={thinking ? { r: [4, 7, 4], opacity: [1, 0.5, 1] } : { r: 4, opacity: 1 }}
+            transition={thinking ? { repeat: Infinity, duration: 0.9, ease: "easeInOut" } : undefined}
+          />
         </svg>
       </div>
 
@@ -106,6 +115,17 @@ export default function RadarGauge({ metrics }: { metrics: Metrics }) {
           </div>
         ))}
       </div>
+
+      {thinking && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+          className="font-mono text-[10px] tracking-[0.25em] text-blood uppercase"
+        >
+          Vesper is reading you
+        </motion.p>
+      )}
     </div>
   );
 }

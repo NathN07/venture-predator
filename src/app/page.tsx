@@ -55,7 +55,10 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ startup: startupInfo, history: historySoFar }),
       });
-      if (!res.ok) throw new Error("VC route failed");
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error ?? "VC route failed");
+      }
       const data: VCResponse = await res.json();
 
       applyDeltas(data.metricDeltas);
@@ -73,8 +76,8 @@ export default function Home() {
         if (v.outcome === "funded") playFund();
         else playPass();
       }
-    } catch {
-      setError("Vesper's line dropped. Try that again.");
+    } catch (err) {
+      setError(err instanceof Error && err.message !== "VC route failed" ? err.message : "Vesper's line dropped. Try that again.");
     } finally {
       setLoading(false);
     }
@@ -107,25 +110,25 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <div className="grain" />
 
-      <header className="px-6 sm:px-10 py-6 flex items-center justify-between border-b border-line">
-        <span className="font-display text-lg tracking-tight">
+      <header className="px-4 sm:px-10 py-5 sm:py-6 flex flex-wrap items-center justify-between gap-3 border-b border-line">
+        <span className="font-display text-base sm:text-lg tracking-tight">
           VENTURE <span className="text-blood">PREDATOR</span>
         </span>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4 sm:gap-5">
           <button
             onClick={toggleMute}
-            className="font-mono text-[11px] tracking-widest text-paper-dim hover:text-paper uppercase transition"
+            className="font-mono text-[10px] sm:text-[11px] tracking-widest text-paper-dim hover:text-paper uppercase transition"
             aria-label={muted ? "Unmute sound" : "Mute sound"}
           >
             {muted ? "SOUND OFF" : "SOUND ON"}
           </button>
-          <span className="font-mono text-[11px] tracking-widest text-paper-dim uppercase">
+          <span className="hidden sm:inline font-mono text-[11px] tracking-widest text-paper-dim uppercase">
             Prompt Predators
           </span>
         </div>
       </header>
 
-      <main className="flex-1 px-6 sm:px-10 py-12 sm:py-16">
+      <main className="flex-1 px-4 sm:px-10 py-8 sm:py-16">
         <div className="max-w-5xl mx-auto grid lg:grid-cols-[1fr_auto] gap-16 items-start">
           <div>
             {phase === "pitch" && (
@@ -154,7 +157,7 @@ export default function Home() {
 
           {phase !== "pitch" && (
             <div className="lg:sticky lg:top-16">
-              <RadarGauge metrics={metrics} />
+              <RadarGauge metrics={metrics} thinking={loading} />
             </div>
           )}
         </div>

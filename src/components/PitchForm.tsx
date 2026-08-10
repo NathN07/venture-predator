@@ -36,7 +36,7 @@ export default function PitchForm({
         <p className="font-mono text-xs tracking-[0.3em] text-blood mb-3">
           CASE FILE — INTAKE
         </p>
-        <h1 className="font-display text-5xl sm:text-6xl leading-[0.95] mb-4">
+        <h1 className="font-display text-4xl sm:text-6xl leading-[0.95] mb-4">
           Pitch or<br />get eaten.
         </h1>
         <p className="text-paper-dim text-sm max-w-md">
