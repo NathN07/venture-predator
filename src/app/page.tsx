@@ -5,6 +5,7 @@ import RadarGauge from "@/components/RadarGauge";
 import PitchForm from "@/components/PitchForm";
 import VCQuestionCard from "@/components/VCQuestionCard";
 import TermSheet from "@/components/TermSheet";
+import { playWhoosh, playTick, playFund, playPass, setMuted } from "@/lib/sounds";
 import {
   StartupInfo,
   QARound,
@@ -28,8 +29,16 @@ export default function Home() {
   const [verdict, setVerdict] = useState<VCVerdictResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [muted, setMutedState] = useState(false);
+
+  function toggleMute() {
+    const next = !muted;
+    setMutedState(next);
+    setMuted(next);
+  }
 
   function applyDeltas(deltas: Metrics) {
+    playTick();
     setMetrics((m) => ({
       hype: clamp(m.hype + deltas.hype),
       risk: clamp(m.risk + deltas.risk),
@@ -56,9 +65,13 @@ export default function Home() {
         setCurrentQuestion(q.question);
         setReaction(q.reaction);
         setPhase("interrogating");
+        playWhoosh();
       } else {
-        setVerdict(data as VCVerdictResponse);
+        const v = data as VCVerdictResponse;
+        setVerdict(v);
         setPhase("verdict");
+        if (v.outcome === "funded") playFund();
+        else playPass();
       }
     } catch {
       setError("Vesper's line dropped. Try that again.");
@@ -98,9 +111,18 @@ export default function Home() {
         <span className="font-display text-lg tracking-tight">
           VENTURE <span className="text-blood">PREDATOR</span>
         </span>
-        <span className="font-mono text-[11px] tracking-widest text-paper-dim uppercase">
-          Prompt Predators
-        </span>
+        <div className="flex items-center gap-5">
+          <button
+            onClick={toggleMute}
+            className="font-mono text-[11px] tracking-widest text-paper-dim hover:text-paper uppercase transition"
+            aria-label={muted ? "Unmute sound" : "Mute sound"}
+          >
+            {muted ? "SOUND OFF" : "SOUND ON"}
+          </button>
+          <span className="font-mono text-[11px] tracking-widest text-paper-dim uppercase">
+            Prompt Predators
+          </span>
+        </div>
       </header>
 
       <main className="flex-1 px-6 sm:px-10 py-12 sm:py-16">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { StartupInfo } from "@/lib/types";
+import { playClick } from "@/lib/sounds";
 
 export default function PitchForm({
   onSubmit,
@@ -24,7 +25,10 @@ export default function PitchForm({
       transition={{ duration: 0.5 }}
       onSubmit={(e) => {
         e.preventDefault();
-        if (ready) onSubmit({ name, pitch, market });
+        if (ready) {
+          playClick();
+          onSubmit({ name, pitch, market });
+        }
       }}
       className="w-full max-w-xl mx-auto"
     >

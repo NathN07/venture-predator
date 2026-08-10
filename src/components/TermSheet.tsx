@@ -33,7 +33,7 @@ export default function TermSheet({
                 : "text-blood border-blood"
             }`}
           >
-            {funded ? "FUNDED" : "PASSED"}
+            {funded ? "FUNDED" : "REJECTED"}
           </span>
         </div>
 

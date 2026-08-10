@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { playClick } from "@/lib/sounds";
 
 export default function VCQuestionCard({
   round,
@@ -57,6 +58,7 @@ export default function VCQuestionCard({
       <button
         onClick={() => {
           if (answer.trim().length > 2) {
+            playClick();
             onAnswer(answer.trim());
             setAnswer("");
           }
