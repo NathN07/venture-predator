@@ -46,5 +46,5 @@ export async function POST(req: NextRequest) {
 }
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 55;
 export const MAX_QUESTION_ROUNDS = MAX_ROUNDS;

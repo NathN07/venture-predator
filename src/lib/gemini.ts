@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
 
 const MODEL = "gemini-flash-latest";
+const REQUEST_TIMEOUT_MS = 20000; // fail fast, well under Vercel's function limit
 
 /**
  * Calls Gemini with a system + user prompt and parses the reply as JSON.
@@ -35,12 +36,26 @@ async function requestText(system: string, userTurn: string): Promise<string> {
     systemInstruction: system,
     generationConfig: {
       responseMimeType: "application/json",
-      maxOutputTokens: 1000,
+      maxOutputTokens: 700,
     },
   });
 
-  const result = await model.generateContent(userTurn);
+  const result = await withTimeout(
+    model.generateContent(userTurn),
+    REQUEST_TIMEOUT_MS,
+    "Gemini request timed out"
+  );
+
   return result.response.text();
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(message)), ms)
+    ),
+  ]);
 }
 
 function tryParse<T>(raw: string): T | null {
