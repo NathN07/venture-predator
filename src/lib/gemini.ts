@@ -3,15 +3,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
 
 const MODEL = "gemini-flash-latest";
-const REQUEST_TIMEOUT_MS = 20000; // fail fast, well under Vercel's function limit
+const REQUEST_TIMEOUT_MS = 20000;
 const MAX_OVERLOAD_RETRIES = 2;
 const OVERLOAD_RETRY_DELAY_MS = 1200;
 
-/**
- * Calls Gemini with a system + user prompt and parses the reply as JSON.
- * Retries automatically if Google's servers are temporarily overloaded (503),
- * and retries once more with a stricter reminder if the reply isn't valid JSON.
- */
 export async function callVCModel<T>(
   system: string,
   userTurn: string
@@ -20,7 +15,6 @@ export async function callVCModel<T>(
   const parsed = tryParse<T>(raw);
   if (parsed) return parsed;
 
-  // one retry with a harder nudge if the model didn't return clean JSON
   const retryRaw = await requestTextWithOverloadRetry(
     system,
     userTurn +
@@ -46,7 +40,6 @@ async function requestTextWithOverloadRetry(
       if (!isOverloadError(err) || attempt === MAX_OVERLOAD_RETRIES) {
         throw err;
       }
-      // Google's model is momentarily overloaded — brief pause, then retry.
       await sleep(OVERLOAD_RETRY_DELAY_MS * (attempt + 1));
     }
   }
@@ -56,7 +49,11 @@ async function requestTextWithOverloadRetry(
 
 function isOverloadError(err: unknown): boolean {
   const message = err instanceof Error ? err.message : String(err);
-  return message.includes("503") || message.toLowerCase().includes("overloaded") || message.toLowerCase().includes("service unavailable");
+  return (
+    message.includes("503") ||
+    message.toLowerCase().includes("overloaded") ||
+    message.toLowerCase().includes("service unavailable")
+  );
 }
 
 function sleep(ms: number): Promise<void> {

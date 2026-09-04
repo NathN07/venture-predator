@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callVCModel } from "@/lib/gemini";
-import { VC_SYSTEM_PROMPT, buildUserTurn, MAX_ROUNDS } from "@/lib/vcPersona";
+import { VC_SYSTEM_PROMPT, buildUserTurn } from "@/lib/vcPersona";
 import { StartupInfo, QARound, VCResponse } from "@/lib/types";
 import { checkRateLimit } from "@/lib/rateLimit";
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("VC route error:", err);
     return NextResponse.json(
-      { error: "Google's AI service is under heavy load right now. Give it a few seconds and try again" },
+      { error: "Google's AI service is under heavy load right now. Give it a few seconds and try again." },
       { status: 500 }
     );
   }
@@ -47,4 +47,3 @@ export async function POST(req: NextRequest) {
 
 export const runtime = "nodejs";
 export const maxDuration = 55;
-export const MAX_QUESTION_ROUNDS = MAX_ROUNDS;

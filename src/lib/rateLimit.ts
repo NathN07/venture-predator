@@ -1,10 +1,5 @@
-// Simple in-memory rate limiter. Good enough for a solo/small-audience deploy —
-// resets on cold start / redeploy, and isn't shared across serverless instances,
-// but that's an acceptable tradeoff for stopping casual abuse without adding
-// an external dependency (Redis, etc).
-
-const WINDOW_MS = 60_000; // 1 minute
-const MAX_REQUESTS = 15; // per IP per window
+const WINDOW_MS = 60_000;
+const MAX_REQUESTS = 15;
 
 type Bucket = { count: number; windowStart: number };
 
@@ -28,7 +23,6 @@ export function checkRateLimit(ip: string): { allowed: boolean; retryAfterSecond
   return { allowed: true };
 }
 
-// Periodically clear old buckets so the map doesn't grow forever on a long-lived instance.
 setInterval(() => {
   const now = Date.now();
   for (const [ip, bucket] of buckets) {

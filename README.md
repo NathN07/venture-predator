@@ -1,63 +1,36 @@
-# Venture Predator
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-An AI VC Simulator — pitch a startup to Vesper Prey, a ruthless AI venture capitalist, survive 3 rapid-fire follow-up questions, and walk out with a term sheet or a brutal (shareable) rejection.
+## Getting Started
 
-Built for the **Prompt Predators** hackathon team.
-
-## Stack
-
-- Next.js 15 (App Router) + TypeScript
-- Tailwind CSS v4
-- Framer Motion (radar gauge + transitions)
-- `@google/generative-ai` calling Gemini server-side via `/api/vc`
-
-## Run locally
+First, run the development server:
 
 ```bash
-npm install
-cp .env.local.example .env.local   # add your GEMINI_API_KEY
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Open http://localhost:3000. Get a free key at https://aistudio.google.com/apikey (no credit card needed).
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Deploy (Vercel — fastest path)
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```bash
-npm i -g vercel
-vercel
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-Then add `GEMINI_API_KEY` in the Vercel project's Environment Variables settings and redeploy.
+## Learn More
 
-## Architecture
+To learn more about Next.js, take a look at the following resources:
 
-```
-src/
-  app/
-    page.tsx             -> orchestrates phase state: pitch -> interrogating -> verdict
-    api/vc/route.ts       -> POST endpoint, calls Gemini, returns strict JSON
-    globals.css           -> design tokens (colors, fonts) via Tailwind v4 @theme
-  lib/
-    vcPersona.ts          -> system prompt + JSON contract for the VC persona
-    gemini.ts             -> Gemini client wrapper, defensive JSON parsing + 1 retry
-    types.ts              -> shared types / API contract
-  components/
-    PitchForm.tsx         -> elevator pitch intake
-    VCQuestionCard.tsx    -> interrogation round UI
-    RadarGauge.tsx        -> signature live metric visual (Hype / Risk / Interest)
-    TermSheet.tsx         -> final verdict reveal
-```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-**State is intentionally simple**: one `useState` tree in `page.tsx`, no global store. Each turn POSTs the full startup info + Q&A history to `/api/vc`, which asks Gemini to return one of two strict JSON shapes (`question` or `verdict`) — see `lib/vcPersona.ts` for the exact contract. The API route never talks to the client — the browser never sees your API key.
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Design direction
+## Deploy on Vercel
 
-Dark, "term sheet meets interrogation room" identity — not the generic neon-on-black AI look. Fraunces (display serif) for verdict/headline moments, IBM Plex Sans/Mono for the interrogation and data readouts. Signature element is the radar gauge: three arms (Hype/Risk/Interest) sweeping like a predator tracking prey, live-animated with Framer Motion springs.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## Where to extend next
-
-- Persist sessions (currently everything lives in React state — refresh loses progress)
-- Stream the VC's response token-by-token instead of waiting for the full JSON
-- Add a leaderboard of funded pitches (needs a DB — Vercel Postgres or Supabase are fastest to wire up)
-- Voice input for the pitch/answers if you want an extra wow-factor for judges
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

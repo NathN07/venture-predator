@@ -50,30 +50,30 @@ function tone(
   osc.stop(audio.currentTime + delay + duration + 0.05);
 }
 
-// Sharp, dry click for buttons
 export function playClick() {
   tone(650, 0.06, { type: "square", startGain: 0.05 });
 }
 
-// Descending "whoosh" when a new question drops in
 export function playWhoosh() {
   tone(420, 0.25, { type: "sawtooth", startGain: 0.04, freqEnd: 160 });
 }
 
-// Quick tick for radar/metric updates
 export function playTick() {
   tone(900, 0.04, { type: "square", startGain: 0.035 });
 }
 
-// Rising arpeggio for a funded verdict
 export function playFund() {
   [523, 659, 784, 1047].forEach((f, i) =>
     tone(f, 0.28, { type: "triangle", startGain: 0.07, delay: i * 0.09 })
   );
 }
 
-// Low, blunt buzzer for a passed/rejected verdict
 export function playPass() {
   tone(160, 0.5, { type: "sawtooth", startGain: 0.09, freqEnd: 60 });
   tone(80, 0.6, { type: "square", startGain: 0.05, delay: 0.05 });
+}
+
+// New: subtle hover tick for interactive elements
+export function playHover() {
+  tone(1200, 0.03, { type: "sine", startGain: 0.015 });
 }

@@ -7,7 +7,6 @@ const SIZE = 280;
 const CENTER = SIZE / 2;
 const MAX_R = 105;
 
-// Three metric arms, spaced 120° apart, each length = metric value
 const ARMS: { key: keyof Metrics; label: string; angleDeg: number; color: string }[] = [
   { key: "vcInterest", label: "INTEREST", angleDeg: -90, color: "var(--color-amber)" },
   { key: "hype", label: "HYPE", angleDeg: 30, color: "var(--color-venom)" },
@@ -21,10 +20,15 @@ function polar(angleDeg: number, r: number) {
 
 export default function RadarGauge({ metrics, thinking = false }: { metrics: Metrics; thinking?: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-[280px] mx-auto">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.02 }}
+      className="flex flex-col items-center gap-4 w-full max-w-[280px] mx-auto"
+    >
       <div className="relative w-full aspect-square">
         <svg width="100%" height="100%" viewBox={`0 0 ${SIZE} ${SIZE}`}>
-          {/* rings */}
           {[0.35, 0.65, 1].map((f) => (
             <circle
               key={f}
@@ -36,11 +40,9 @@ export default function RadarGauge({ metrics, thinking = false }: { metrics: Met
               strokeWidth={1}
             />
           ))}
-          {/* crosshair */}
           <line x1={CENTER - MAX_R} y1={CENTER} x2={CENTER + MAX_R} y2={CENTER} stroke="var(--color-line)" strokeWidth={1} />
           <line x1={CENTER} y1={CENTER - MAX_R} x2={CENTER} y2={CENTER + MAX_R} stroke="var(--color-line)" strokeWidth={1} />
 
-          {/* continuous sweep — speeds up while Vesper is "thinking" */}
           <motion.g
             style={{ transformOrigin: `${CENTER}px ${CENTER}px` }}
             animate={{ rotate: 360 }}
@@ -53,7 +55,6 @@ export default function RadarGauge({ metrics, thinking = false }: { metrics: Met
             />
           </motion.g>
 
-          {/* metric arms */}
           {ARMS.map((arm) => {
             const r = (metrics[arm.key] / 100) * MAX_R;
             const tip = polar(arm.angleDeg, r);
@@ -93,7 +94,6 @@ export default function RadarGauge({ metrics, thinking = false }: { metrics: Met
             );
           })}
 
-          {/* center blip: the prey — pulses while Vesper is deciding */}
           <motion.circle
             cx={CENTER}
             cy={CENTER}
@@ -108,9 +108,16 @@ export default function RadarGauge({ metrics, thinking = false }: { metrics: Met
       <div className="flex gap-6 font-mono text-xs">
         {ARMS.map((arm) => (
           <div key={arm.key} className="flex flex-col items-center gap-1">
-            <span style={{ color: arm.color }} className="text-lg font-semibold tabular-nums">
+            <motion.span
+              key={Math.round(metrics[arm.key])}
+              initial={{ scale: 1.3, opacity: 0.5 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.25 }}
+              style={{ color: arm.color }}
+              className="text-lg font-semibold tabular-nums"
+            >
               {Math.round(metrics[arm.key])}
-            </span>
+            </motion.span>
             <span className="text-paper-dim tracking-widest text-[10px]">{arm.label}</span>
           </div>
         ))}
@@ -126,6 +133,6 @@ export default function RadarGauge({ metrics, thinking = false }: { metrics: Met
           Vesper is reading you
         </motion.p>
       )}
-    </div>
+    </motion.div>
   );
 }
