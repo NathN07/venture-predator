@@ -4,22 +4,24 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
 
 const MODEL = "gemini-flash-latest";
 const REQUEST_TIMEOUT_MS = 20000; // fail fast, well under Vercel's function limit
+const MAX_OVERLOAD_RETRIES = 2;
+const OVERLOAD_RETRY_DELAY_MS = 1200;
 
 /**
  * Calls Gemini with a system + user prompt and parses the reply as JSON.
- * Strips markdown fences defensively since models sometimes wrap JSON in them.
- * Retries once with a stricter reminder if parsing fails.
+ * Retries automatically if Google's servers are temporarily overloaded (503),
+ * and retries once more with a stricter reminder if the reply isn't valid JSON.
  */
 export async function callVCModel<T>(
   system: string,
   userTurn: string
 ): Promise<T> {
-  const raw = await requestText(system, userTurn);
+  const raw = await requestTextWithOverloadRetry(system, userTurn);
   const parsed = tryParse<T>(raw);
   if (parsed) return parsed;
 
   // one retry with a harder nudge if the model didn't return clean JSON
-  const retryRaw = await requestText(
+  const retryRaw = await requestTextWithOverloadRetry(
     system,
     userTurn +
       "\n\nIMPORTANT: your previous reply was not valid JSON. Respond with ONLY the raw JSON object, nothing else."
@@ -28,6 +30,37 @@ export async function callVCModel<T>(
   if (retryParsed) return retryParsed;
 
   throw new Error("VC model did not return parseable JSON after retry.");
+}
+
+async function requestTextWithOverloadRetry(
+  system: string,
+  userTurn: string
+): Promise<string> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= MAX_OVERLOAD_RETRIES; attempt++) {
+    try {
+      return await requestText(system, userTurn);
+    } catch (err) {
+      lastError = err;
+      if (!isOverloadError(err) || attempt === MAX_OVERLOAD_RETRIES) {
+        throw err;
+      }
+      // Google's model is momentarily overloaded — brief pause, then retry.
+      await sleep(OVERLOAD_RETRY_DELAY_MS * (attempt + 1));
+    }
+  }
+
+  throw lastError;
+}
+
+function isOverloadError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err);
+  return message.includes("503") || message.toLowerCase().includes("overloaded") || message.toLowerCase().includes("service unavailable");
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function requestText(system: string, userTurn: string): Promise<string> {

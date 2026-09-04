@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("VC route error:", err);
     return NextResponse.json(
-      { error: "The VC hung up. Try again." },
+      { error: "Google's AI service is under heavy load right now. Give it a few seconds and try again" },
       { status: 500 }
     );
   }
