@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callVCModel } from "@/lib/gemini";
+import { callVCModel } from "@/lib/groq";
 import { VC_SYSTEM_PROMPT, buildUserTurn } from "@/lib/vcPersona";
 import { StartupInfo, QARound, VCResponse } from "@/lib/types";
 import { checkRateLimit } from "@/lib/rateLimit";
