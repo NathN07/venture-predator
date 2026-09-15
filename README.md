@@ -63,3 +63,16 @@ Traditional pitch decks are slow, passive, and filled with fluff. Venture Predat
 ---
 
 ## 🛠️ Architecture & Tech Stack
+
+venture-predator/ ├── src/ │ ├── app/ │ │ ├── api/interrogate/route.ts # AI Interrogation Serverless Handler │ │ ├── portal/founder/page.tsx # Founder Intake & Interrogation Arena │ │ ├── portal/vc/page.tsx # VC Deal Radar & Slideout Drawer │ │ ├── globals.css # Cyberpunk scanlines, glows, CRT theme │ │ ├── layout.tsx # Monospace system font configuration │ │ └── page.tsx # Split-path landing page & telemetry │ ├── components/ │ │ ├── AudioEngine.ts # Web Audio API synthetic sound engine │ │ ├── CyberBackground.tsx # Canvas particle & perspective grid │ │ ├── DealDrawer.tsx # Deep-dive 4-turn transcript drawer │ │ ├── DirectIntroModal.tsx # High-priority founder intro modal │ │ ├── FrequencyWave.tsx # Audio visualizer canvas frequency wave │ │ ├── GlitchText.tsx # Chromatic aberration glitch typography │ │ ├── Header.tsx # Navbar with status, sound & role toggle │ │ ├── HypeGauge.tsx # Framer motion spring-animated gauges │ │ └── TermSheetModal.tsx # Soft term sheet submission modal │ └── lib/ │ ├── dealStore.ts # Dual-layer Supabase & cross-tab sync store │ ├── supabaseClient.ts # Supabase client initializer │ ├── types.ts # Core TypeScript definitions │ └── vesperAI.ts # Gemini API caller & algorithmic persona └── supabase/ └── schema.sql # Complete PostgreSQL & Realtime schema
+
+
+* **Framework**: [Next.js](https://nextjs.org/) (App Router, TypeScript)
+* **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+* **Animations**: [Framer Motion](https://www.framer.com/motion/) + HTML5 Canvas
+* **Icons**: [Lucide React](https://lucide.dev/)
+* **Sound**: Native Browser [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+* **Realtime Database**: [Supabase](https://supabase.com/) + HTML5 `BroadcastChannel`
+* **AI Engine**: Gemini 2.5 Flash API + Algorithmic Fallback Evaluator
+
+---
